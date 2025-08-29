@@ -1,7 +1,20 @@
 import numpy as np
+import requests as rq
+import pandas as pd
 
 # Run simulations for different values of n
 n_sims = 1000000
+
+#Import FPL API data-----------------
+api_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
+api_data = rq.get(api_url).json()
+player_data_full=pd.DataFrame(api_data['elements'])
+player_data_full.set_index('web_name', inplace=True) #inplace=True simply replaces the data frame instead of making a copy (more efficient)
+player_data = player_data_full[['element_type','expected_goals_per_90','expected_assists_per_90','expected_goals_conceded_per_90']] #limit to relevant data
+player_data.index.name = 'Name'
+player_data.columns = ['Position','xG','xA','xGC'] #note for positions: 1=GKP, 2=DEF, 3=MID, 4=FWD
+player_data['xCS']=np.exp(-player_data['xGC']) #Calculating xCS based on xGC per 90 as no accurate xCS data per 90 at start of season
+
 
 #Player stats---------------------------------------------------------
 #replace with data frame at future stage
@@ -24,21 +37,20 @@ che_xcs= 10/38
 che_gw_fdr=3 #chelsea gameweek fixture difficulty rating
 
 #Points calculators-------------------------------------------------
-def points_calc(pos,xg,xa,xcs,FDR):
-    FDR_coefficient=np.array([1.2,1,0.95,0.85]) # Can be edited to be more conservative
+def points_calc(pos,xg,xa,xcs):
     
     goals = np.random.poisson(xg)
     assists = np.random.poisson(xa)
     clean_sheet = np.random.binomial(1, p=xcs) #binomial dist for success/failure outcomes
     
-    if pos == "FWD":
-        points = round(FDR_coefficient[FDR-2]*((goals * 4) + (assists * 3) + 2)) # constant +2 for appearance
-    elif pos == "MID":
-        points = round(FDR_coefficient[FDR-2]*((goals * 5) + (assists * 3) + (1*clean_sheet) + 2)) # constant +2 for appearance
-    elif pos == "DEF":
-        points = round(FDR_coefficient[FDR-2]*((goals * 6) + (assists * 3) + (4*clean_sheet) + 2)) # constant +2 for appearance
-    elif pos == "GKP":
-        points = round(FDR_coefficient[FDR-2]*((goals * 10) + (assists * 3) + (4*clean_sheet) + 2)) # constant +2 for appearance
+    if pos == 4: # FWD
+        points = (goals * 4) + (assists * 3) + 2 # constant +2 for appearance
+    elif pos == 3: # MID
+        points = (goals * 5) + (assists * 3) + (1*clean_sheet) + 2 # constant +2 for appearance
+    elif pos == 2: # DEF
+        points = (goals * 6) + (assists * 3) + (4*clean_sheet) + 2 # constant +2 for appearance
+    elif pos == 1: # GKP
+        points = (goals * 10) + (assists * 3) + (4*clean_sheet) + 2 # constant +2 for appearance
     else:
         "Error in calculating points"
     return points
@@ -131,7 +143,9 @@ def captain_selector(p1, p1_pos, xg_p1, xa_p1, xcs_p1, fdr_p1, p2, p2_pos, xg_p2
     
     return captain
 
-captain=captain_selector("SALAH", salah_pos,salah_xg,salah_xa,liv_xcs,liv_gw_fdr,"PALMER", palmer_pos,palmer_xg,palmer_xa,che_xcs,che_gw_fdr)
+player=str(input("Player? "))
+player_points=points_calc(player_data.loc[player,'Position'],player_data.loc[player,'xG'],player_data.loc[player,'xA'],player_data.loc[player,'xCS'])
+print(player_points)
 
 
 
