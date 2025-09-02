@@ -5,7 +5,8 @@ import pandas as pd
 # Run simulations for different values of n
 n_sims = 1000000
 
-#Import FPL API data-----------------
+#Import and clean FPL API data-----------------
+#Player Data
 api_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
 api_data = rq.get(api_url).json()
 player_data_full=pd.DataFrame(api_data['elements'])
@@ -13,7 +14,12 @@ player_data_full.set_index('web_name', inplace=True) #inplace=True simply replac
 player_data = player_data_full[['element_type','expected_goals_per_90','expected_assists_per_90','expected_goals_conceded_per_90']] #limit to relevant data
 player_data.index.name = 'Name'
 player_data.columns = ['Position','xG','xA','xGC'] #note for positions: 1=GKP, 2=DEF, 3=MID, 4=FWD
-player_data['xCS']=np.exp(-player_data['xGC']) #Calculating xCS based on xGC per 90 as no accurate xCS data per 90 at start of season
+player_data['xCS'] = np.exp(-player_data['xGC']) #Calculating xCS based on xGC per 90 as no accurate xCS data per 90 at start of season
+
+#FPL Player Data ("user")
+#user_api=
+#user_data=
+
 
 
 #Player stats---------------------------------------------------------
@@ -37,7 +43,7 @@ che_xcs= 10/38
 che_gw_fdr=3 #chelsea gameweek fixture difficulty rating
 
 #Points calculators-------------------------------------------------
-def points_calc(pos,xg,xa,xcs):
+def predict_player_points(pos,xg,xa,xcs):
     
     goals = np.random.poisson(xg)
     assists = np.random.poisson(xa)
@@ -56,8 +62,8 @@ def points_calc(pos,xg,xa,xcs):
     return points
         
 def captain_selector(p1, p1_pos, xg_p1, xa_p1, xcs_p1, fdr_p1, p2, p2_pos, xg_p2, xa_p2, xcs_p2, fdr_p2): #need to put player names and position in "" string format
-    p1_sim_points=np.array([points_calc(p1_pos,xg_p1,xa_p1,xcs_p1,fdr_p1) for _ in range(n_sims)])
-    p2_sim_points=np.array([points_calc(p2_pos,xg_p2,xa_p2,xcs_p2,fdr_p2)  for _ in range(n_sims)])
+    p1_sim_points=np.array([predict_player_points(p1_pos,xg_p1,xa_p1,xcs_p1,fdr_p1) for _ in range(n_sims)])
+    p2_sim_points=np.array([predict_player_points(p2_pos,xg_p2,xa_p2,xcs_p2,fdr_p2)  for _ in range(n_sims)])
     
     p1_wins=0 #metric tally initialisation
     p2_wins=0
@@ -143,9 +149,18 @@ def captain_selector(p1, p1_pos, xg_p1, xa_p1, xcs_p1, fdr_p1, p2, p2_pos, xg_p2
     
     return captain
 
-player=str(input("Player? "))
-player_points=points_calc(player_data.loc[player,'Position'],player_data.loc[player,'xG'],player_data.loc[player,'xA'],player_data.loc[player,'xCS'])
-print(player_points)
+#team_id=int(input("Team ID? "))
+team_players = ['M.Salah','Wood', 'Konsa', 'Digne' ]
+team_players_pred_points = []
+
+for player in team_players:
+    player_points=predict_player_points(player_data.loc[player,'Position'],player_data.loc[player,'xG'],player_data.loc[player,'xA'],player_data.loc[player,'xCS'])
+    team_players_pred_points.append(player_points)
+
+team_total_pred_points=sum(team_players_pred_points)
+    
+print(team_total_pred_points)
+
 
 
 
