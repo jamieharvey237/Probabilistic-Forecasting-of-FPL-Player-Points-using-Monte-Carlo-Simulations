@@ -11,36 +11,10 @@ api_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
 api_data = rq.get(api_url).json()
 player_data_full=pd.DataFrame(api_data['elements'])
 player_data_full.set_index('web_name', inplace=True) #inplace=True simply replaces the data frame instead of making a copy (more efficient)
-player_data = player_data_full[['element_type','expected_goals_per_90','expected_assists_per_90','expected_goals_conceded_per_90']] #limit to relevant data
+player_data = player_data_full[['element_type','expected_goals_per_90','expected_assists_per_90','expected_goals_conceded_per_90']].copy() #limit to relevant data
 player_data.index.name = 'Name'
 player_data.columns = ['Position','xG','xA','xGC'] #note for positions: 1=GKP, 2=DEF, 3=MID, 4=FWD
 player_data['xCS'] = np.exp(-player_data['xGC']) #Calculating xCS based on xGC per 90 as no accurate xCS data per 90 at start of season
-
-#FPL Player Data ("user")
-#user_api=
-#user_data=
-
-
-
-#Player stats---------------------------------------------------------
-#replace with data frame at future stage
-haaland_xg = 0.75 
-haaland_xa = 0.11
-haaland_pos="FWD"
-mci_xcs=12/38
-mci_gw_fdr=3
-
-salah_xg=0.72
-salah_xa=0.41
-salah_pos="MID"
-liv_xcs=14/38 #expected clean sheets
-liv_gw_fdr=4 #chelsea gameweek fixture difficulty rating
-
-palmer_xg=0.5
-palmer_xa=0.3
-palmer_pos="MID"
-che_xcs= 10/38
-che_gw_fdr=3 #chelsea gameweek fixture difficulty rating
 
 #Points calculators-------------------------------------------------
 def predict_player_points(pos,xg,xa,xcs):
