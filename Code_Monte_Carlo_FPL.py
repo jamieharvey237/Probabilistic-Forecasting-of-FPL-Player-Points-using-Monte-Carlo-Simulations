@@ -16,6 +16,7 @@ player_data.index.name = 'Name'
 player_data.columns = ['Position','xG','xA','xGC'] #note for positions: 1=GKP, 2=DEF, 3=MID, 4=FWD
 player_data['xCS'] = np.exp(-player_data['xGC']) #Calculating xCS based on xGC per 90 as no accurate xCS data per 90 at start of season
 
+
 #Points calculators-------------------------------------------------
 def predict_player_points(pos,xg,xa,xcs):
     
@@ -123,15 +124,20 @@ def captain_selector(p1, p1_pos, xg_p1, xa_p1, xcs_p1, fdr_p1, p2, p2_pos, xg_p2
     
     return captain
 
+def predict_team_points(team_players, captain):
+    team_players_pred_points = []
+    for player in team_players:
+        player_points=predict_player_points(player_data.loc[player,'Position'],player_data.loc[player,'xG'],player_data.loc[player,'xA'],player_data.loc[player,'xCS'])
+        team_players_pred_points.append(player_points)
+    
+    captain_points=predict_player_points(player_data.loc[captain,'Position'],player_data.loc[captain,'xG'],player_data.loc[captain,'xA'],player_data.loc[captain,'xCS'])
+
+    team_total_pred_points=sum(team_players_pred_points)+captain_points #captain has double points
+    return team_total_pred_points
+
 #team_id=int(input("Team ID? "))
 team_players = ['M.Salah','Wood', 'Konsa', 'Digne' ]
-team_players_pred_points = []
-
-for player in team_players:
-    player_points=predict_player_points(player_data.loc[player,'Position'],player_data.loc[player,'xG'],player_data.loc[player,'xA'],player_data.loc[player,'xCS'])
-    team_players_pred_points.append(player_points)
-
-team_total_pred_points=sum(team_players_pred_points)
+team_total_pred_points=predict_team_points(team_players, 'M.Salah')
     
 print(team_total_pred_points)
 
