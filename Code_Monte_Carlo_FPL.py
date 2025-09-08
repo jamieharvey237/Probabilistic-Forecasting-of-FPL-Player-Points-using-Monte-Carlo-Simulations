@@ -11,10 +11,19 @@ api_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
 api_data = rq.get(api_url).json()
 player_data_full=pd.DataFrame(api_data['elements'])
 player_data_full.set_index('web_name', inplace=True) #inplace=True simply replaces the data frame instead of making a copy (more efficient)
-player_data = player_data_full[['element_type','expected_goals_per_90','expected_assists_per_90','expected_goals_conceded_per_90']].copy() #limit to relevant data
+player_data = player_data_full[['element_type','expected_goals_per_90','expected_assists_per_90','expected_goals_conceded_per_90','id']].copy() #limit to relevant data
 player_data.index.name = 'Name'
-player_data.columns = ['Position','xG','xA','xGC'] #note for positions: 1=GKP, 2=DEF, 3=MID, 4=FWD
+player_data.columns = ['Position','xG','xA','xGC','id'] #note for positions: 1=GKP, 2=DEF, 3=MID, 4=FWD
 player_data['xCS'] = np.exp(-player_data['xGC']) #Calculating xCS based on xGC per 90 as no accurate xCS data per 90 at start of season
+
+#User Team Data 
+#team_id=int(input("Team ID? "))
+#gw=int(input("Most Recent Gameweek? "))
+gw=3
+team_id=4826865
+user_url =  "https://fantasy.premierleague.com/api/entry/%i/event/%i/picks/" %(team_id,gw)
+api_user_data = rq.get(user_url).json()
+user_data_full=pd.DataFrame(api_user_data['picks'])
 
 
 #Points calculators-------------------------------------------------
