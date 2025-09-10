@@ -24,6 +24,15 @@ team_id=4826865
 user_url =  "https://fantasy.premierleague.com/api/entry/%i/event/%i/picks/" %(team_id,gw)
 api_user_data = rq.get(user_url).json()
 user_data_full=pd.DataFrame(api_user_data['picks'])
+user_team_players=[]
+
+for i in range(11):
+    player_code=user_data_full.loc[i,'element']
+    player = player_data_full.index[player_data_full['id'] == player_code].item() #.item extracts single string efficiently
+    user_team_players.append(player)
+
+print(user_team_players)
+    
 
 
 #Points calculators-------------------------------------------------
