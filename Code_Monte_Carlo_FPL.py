@@ -31,10 +31,6 @@ for i in range(11):
     player = player_data_full.index[player_data_full['id'] == player_code].item() #.item extracts single string efficiently
     user_team_players.append(player)
 
-print(user_team_players)
-    
-
-
 #Points calculators-------------------------------------------------
 def predict_player_points(pos,xg,xa,xcs):
     
@@ -153,9 +149,8 @@ def predict_team_points(team_players, captain):
     team_total_pred_points=sum(team_players_pred_points)+captain_points #captain has double points
     return team_total_pred_points
 
-#team_id=int(input("Team ID? "))
-team_players = ['M.Salah','Wood', 'Konsa', 'Digne' ]
-team_total_pred_points=predict_team_points(team_players, 'M.Salah')
+#Predict team points-----------------------------------------------------------------
+team_total_pred_points=predict_team_points(user_team_players, 'M.Salah')
     
 print(team_total_pred_points)
 
