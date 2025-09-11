@@ -3,7 +3,7 @@ import requests as rq
 import pandas as pd
 
 # Run simulations for different values of n
-n_sims = 1000000
+n_sims = 10000
 
 #Import and clean FPL API data-----------------
 #Player Data
@@ -149,10 +149,12 @@ def predict_team_points(team_players, captain):
     team_total_pred_points=sum(team_players_pred_points)+captain_points #captain has double points
     return team_total_pred_points
 
-#Predict team points-----------------------------------------------------------------
-team_total_pred_points=predict_team_points(user_team_players, 'M.Salah')
-    
-print(team_total_pred_points)
+#Predict team points using Monte Carlo method-----------------------------------------------------------------
+captain = 'M.Salah'
+user_team_points=np.array([predict_team_points(user_team_players,captain) for _ in range(n_sims)])
+avg_predicted_points=user_team_points.mean()
+
+print(avg_predicted_points)
 
 
 
