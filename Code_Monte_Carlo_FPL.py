@@ -150,6 +150,7 @@ def predict_team_points(team_players, captain):
     return team_total_pred_points
 
 #Predict team points using Monte Carlo method-----------------------------------------------------------------
+#captain=str(input("Who is your captain?"))
 captain = 'M.Salah'
 user_team_points=np.array([predict_team_points(user_team_players,captain) for _ in range(n_sims)])
 avg_predicted_points=user_team_points.mean()
