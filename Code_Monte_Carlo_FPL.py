@@ -154,8 +154,11 @@ def predict_team_points(team_players, captain):
 captain = 'M.Salah'
 user_team_points=np.array([predict_team_points(user_team_players,captain) for _ in range(n_sims)])
 avg_predicted_points=user_team_points.mean()
+q1=np.percentile(user_team_points,25)
+q3=np.percentile(user_team_points,75)
 
-print(avg_predicted_points)
+print("Predicted points total: ", avg_predicted_points)
+print("Predicted points range: %i - %i" %(q1, q3)) #Interquartile range
 
 
 
